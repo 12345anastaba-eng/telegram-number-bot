@@ -58,7 +58,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"🔢 الأرقام: {numbers}\n💰 المجموع: {total}\n💾 التراكمي: {user_sums[user_id]:.2f}")
 
 def main():
-    TOKEN = os.environ.get('8599131309:AAEsBg0ez3wjaXvCUppjFRHkRKLwKljtL8Y')
+    TOKEN = os.environ.get('BOT_TOKEN')
     if not TOKEN:
         print("❌ Error: BOT_TOKEN not found!")
         return
