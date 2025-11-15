@@ -1,52 +1,13 @@
-from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 import re
 import os
 
 user_sums = {}
 
-async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    welcome_text = """
-🔢 **بوت جمع الأرقام الذكي**
+async def start(update, context):
+    await update.message.reply_text("🔢 بوت جمع الأرقام - أرسل أرقاماً!")
 
-🎯 **كيفية الاستخدام:**
-• أرسل أي أرقام وسأجمعها تلقائياً
-• استخدم /sum متبوعاً بالأرقام
-• استخدم /total لمعرفة المجموع الكلي
-• استخدم /reset لمسح المجموع
-
-📝 **أمثلة:**
-10 20 30
-أو: /sum 5 15 25
-أو: "اشتريت 3 تفاحات بسعر 12.5"
-    """
-    await update.message.reply_text(welcome_text)
-
-async def sum_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    if context.args:
-        numbers = []
-        for arg in context.args:
-            try:
-                numbers.append(float(arg))
-            except ValueError:
-                pass
-        if numbers:
-            total = sum(numbers)
-            user_sums[user_id] = user_sums.get(user_id, 0) + total
-            await update.message.reply_text(f"✅ تم جمع: {numbers}\n📊 المجموع: {total}\n💾 التراكمي: {user_sums[user_id]:.2f}")
-
-async def total_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    current_total = user_sums.get(user_id, 0)
-    await update.message.reply_text(f"💰 المجموع التراكمي: {current_total:.2f}")
-
-async def reset_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    user_sums[user_id] = 0
-    await update.message.reply_text("🔄 تم مسح المجموع بنجاح")
-
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_message(update, context):
     user_id = update.effective_user.id
     text = update.message.text
     
@@ -55,23 +16,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if numbers:
         total = sum(numbers)
         user_sums[user_id] = user_sums.get(user_id, 0) + total
-        await update.message.reply_text(f"🔢 الأرقام: {numbers}\n💰 المجموع: {total}\n💾 التراكمي: {user_sums[user_id]:.2f}")
+        await update.message.reply_text(f"المجموع: {total}")
 
 def main():
     TOKEN = os.environ.get('BOT_TOKEN')
-    if not TOKEN:
-        print("❌ Error: BOT_TOKEN not found!")
-        return
-    
     app = Application.builder().token(TOKEN).build()
-    
-    app.add_handler(CommandHandler("start", start_command))
-    app.add_handler(CommandHandler("sum", sum_command))
-    app.add_handler(CommandHandler("total", total_command))
-    app.add_handler(CommandHandler("reset", reset_command))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    
-    print("✅ بوت جمع الأرقام يعمل...")
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.TEXT, handle_message))
+    print("✅ البوت يعمل...")
     app.run_polling()
 
 if __name__ == "__main__":
